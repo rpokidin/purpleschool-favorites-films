@@ -1,0 +1,7 @@
+h1 {
+  font-weight: 600;
+  font-size: 64px;
+  color: var(--gray-50);
+  letter-spacing: -2%;
+  margin-bottom: 20px;
+}
