@@ -3,7 +3,9 @@ button {
   font-size: 16px;
   color: var(--white);
   padding: 16px 32px;
+  height: 56px;
   cursor: pointer;
+  border: none;
   border-radius: 12px;
 }
 button:hover {

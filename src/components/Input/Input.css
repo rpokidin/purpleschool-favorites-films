@@ -1,0 +1,12 @@
+input {
+  background-color: var(--black-10);
+  font-size: 14px;
+  color: var(--white);
+  min-width: 384px;
+  height: 56px;
+  border: 1px solid var(--gray-700);
+  border-radius: 12px;
+}
+input::placeholder {
+  color: var(--gray-600);
+}
