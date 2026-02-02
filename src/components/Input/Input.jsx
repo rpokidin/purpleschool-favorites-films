@@ -1,6 +1,12 @@
 import './Input.css'
 
-function Input({ ico = null, name = '', placeholder = '' }) {
+function Input({ 
+  ico = null, 
+  name = '', 
+  placeholder = '',
+  value = '',
+  onChange = () => {},
+}) {
 
   const inputStyle = {
     backgroundPosition: '16px center',
@@ -19,6 +25,8 @@ function Input({ ico = null, name = '', placeholder = '' }) {
       placeholder={placeholder}
       name={name} 
       style={inputStyle}
+      value={value}
+      onChange={onChange}
       />
   )
 }
