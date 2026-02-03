@@ -1,7 +1,11 @@
 :root {
   --white: #FFF;
   --gray-50: #EBEEF5;
+  --gray-200: #A8AEBF;
   --gray-300: #8E95A9;
+  --gray-600: #475069;  
+  --gray-700: #323B54;
+  --black-10: rgba(0, 0, 0, 0.1);
   --primary-400: #7B6EF6;
 }
 
@@ -13,5 +17,15 @@
 
 body {
   background-color: #121829;
+  background-image: url(../public/bg.png);
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 100vh;
   font-family: "Poppins", sans-serif;
+}
+
+.wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
 }
