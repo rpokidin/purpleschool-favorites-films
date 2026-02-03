@@ -1,6 +1,6 @@
 import './Paragraph.css'
 
-function Paragraph({ text, size }) {
+function Paragraph({ text, size = 16 }) {
 
   return (
     <p style={{
