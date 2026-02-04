@@ -1,13 +1,12 @@
-button {
+.btn-default {
   background-color: var(--primary-400);
   font-size: 16px;
   color: var(--white);
   padding: 16px 32px;
   height: 56px;
-  cursor: pointer;
   border: none;
   border-radius: 12px;
 }
-button:hover {
+.btn-default:hover {
   opacity: .9;
 }

@@ -1,0 +1,6 @@
+.film-list {
+  display: grid;
+  gap: clamp(12px, 2vw, 24px);
+  grid-template-columns: repeat(auto-fit, minmax(282px, 1fr));
+  padding: 50px 0;
+}
