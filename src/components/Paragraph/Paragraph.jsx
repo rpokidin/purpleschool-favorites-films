@@ -1,11 +1,14 @@
-import './Paragraph.css'
+import styles from './Paragraph.module.css'
 
 function Paragraph({ text, size = 16 }) {
 
   return (
-    <p style={{
-      fontSize: `${size}px`,
-    }}>{text}</p>
+    <p 
+      className={styles['paragraph']}
+      style={{
+        fontSize: `${size}px`,
+      }}
+    >{text}</p>
   )
 }
 

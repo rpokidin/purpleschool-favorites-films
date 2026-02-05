@@ -1,4 +1,4 @@
-import './Input.css'
+import styles from './Input.module.css'
 
 function Input({ 
   ico = null, 
@@ -21,6 +21,7 @@ function Input({
 
   return (
     <input 
+      className={styles['input-default']}
       type="text" 
       placeholder={placeholder}
       name={name} 

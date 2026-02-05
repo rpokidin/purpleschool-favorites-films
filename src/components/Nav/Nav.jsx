@@ -1,9 +1,9 @@
-import './Nav.css'
+import styles from './Nav.module.css'
 
 function Nav() {
 
   return (
-    <nav>
+    <nav className={styles['nav']}>
       <ul>
         <li><a href="#">Поиск фильмов</a></li>
         <li><a href="#">Мои фильмы</a></li>

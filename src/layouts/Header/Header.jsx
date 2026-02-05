@@ -1,10 +1,10 @@
-import './Header.css'
+import styles from './Header.module.css'
 
 function Header({ children }) {
 
   return (
-    <header>
-      <div className='wrapper'>{children}</div>
+    <header className={styles['header']}>
+      <div className={styles['header__wrapper']}>{children}</div>
     </header>
   )
 }

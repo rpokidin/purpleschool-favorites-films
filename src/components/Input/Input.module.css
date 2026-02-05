@@ -1,4 +1,4 @@
-input {
+.input-default {
   background-color: var(--black-10);
   font-size: 14px;
   color: var(--white);
@@ -7,6 +7,6 @@ input {
   border: 1px solid var(--gray-700);
   border-radius: 12px;
 }
-input::placeholder {
+.input-default::placeholder {
   color: var(--gray-600);
 }

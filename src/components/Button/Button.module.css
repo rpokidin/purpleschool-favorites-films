@@ -1,4 +1,4 @@
-.btn-default {
+.btn {
   background-color: var(--primary-400);
   font-size: 16px;
   color: var(--white);
@@ -7,6 +7,6 @@
   border: none;
   border-radius: 12px;
 }
-.btn-default:hover {
+.btn:hover {
   opacity: .9;
 }
