@@ -7,6 +7,7 @@ import Search from './components/Search/Search'
 import FilmList from './components/FilmList/FilmList'
 import FilmCard from './components/FilmCard/FilmCard'
 import styles from './index.module.css'
+import Login from './components/Login/Login'
 
 const data = [
   {
@@ -35,6 +36,8 @@ function App() {
         <Nav/>
       </Header>
       <div className={styles['wrapper']}>
+        <TitleH1 title="Вход"/>
+        <Login/>
         <TitleH1 title="Поиск"/>
         <Paragraph 
           text="Введите название фильма, сериала или мультфильма для поиска и добавления в избранное."

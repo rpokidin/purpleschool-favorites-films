@@ -4,6 +4,9 @@
   gap: 64px;
 }
 .nav ul li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
   font-size: 16px;
   letter-spacing: 2%;
