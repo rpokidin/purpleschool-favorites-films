@@ -1,6 +1,6 @@
 import Input from '../Input/Input'
 import Button from '../Button/Button'
-import './Search.css'
+import styles from './Search.module.css'
 import { useState } from 'react';
 
 function Search() {
@@ -23,7 +23,7 @@ function Search() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className={styles['form']} onSubmit={handleSubmit}>
       <Input 
         ico="/public/search-ico.svg" 
         placeholder="Введите название"
