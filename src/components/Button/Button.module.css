@@ -1,5 +1,6 @@
-.btn-default {
+.btn {
   background-color: var(--primary-400);
+  width: fit-content;
   font-size: 16px;
   color: var(--white);
   padding: 16px 32px;
@@ -7,6 +8,6 @@
   border: none;
   border-radius: 12px;
 }
-.btn-default:hover {
+.btn:hover {
   opacity: .9;
 }
