@@ -31,18 +31,14 @@ const data = [
 function App() {
 
   return (
-    <>
+    <UserContextProvider>
       <Header>
         <Logo/>
-        <UserContextProvider>
-          <Nav/>
-        </UserContextProvider>
+        <Nav/>
       </Header>
       <div className={styles['wrapper']}>
         <TitleH1 title="Вход"/>
-        <UserContextProvider>
-          <Login/>
-        </UserContextProvider>
+        <Login/>
         <TitleH1 title="Поиск"/>
         <Paragraph 
           text="Введите название фильма, сериала или мультфильма для поиска и добавления в избранное."
@@ -63,7 +59,7 @@ function App() {
           }
         </FilmList>
       </div>
-    </>
+    </UserContextProvider>
   )
 }
 

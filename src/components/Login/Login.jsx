@@ -1,86 +1,131 @@
 import Input from '../Input/Input';
 import Button from '../Button/Button';
 import styles from './Login.module.css';
-import { useState } from 'react';
+import { useState, useContext, useCallback } from 'react';
+import { UserContext } from '../../context/user.context';
 
 function Login() {
-  const [username, setUsername] = useState('');
-  const [error, setError] = useState(''); // Для отображения ошибок
+  // Локальное состояние для значения поля ввода
+  const [username, setLocalUsername] = useState('');
+  // Локальное состояние для отображения ошибок валидации
+  const [error, setError] = useState('');
 
-  // Валидация имени пользователя
+  // Получаем функцию обновления глобального состояния username из контекста
+  const { setUsername } = useContext(UserContext);
+
+  // Проверяет доступность localStorage в текущем окружении
+  const canUseLocalStorage = () => {
+    try {
+      return 'localStorage' in window && window.localStorage !== null;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Загружает массив пользователей из localStorage
+  const loadUsers = () => {
+    try {
+      return JSON.parse(localStorage.getItem('user')) || [];
+    } catch (err) {
+      console.error('Ошибка чтения из localStorage:', err);
+      return [];
+    }
+  };
+
+  // Сохраняет массив пользователей в localStorage
+  const saveUsers = (users) => {
+    try {
+      localStorage.setItem('user', JSON.stringify(users));
+    } catch (err) {
+      console.error('Ошибка записи в localStorage:', err);
+      throw err;
+    }
+  };
+
+  // Валидирует имя пользователя:
   const isValidUsername = (name) => {
     const trimmed = name.trim();
     if (trimmed.length < 2) return false;
-    // Разрешаем: буквы (англ./рус.), цифры, пробелы, дефисы
     return /^[a-zA-Za-яА-Я0-9\s-]+$/.test(trimmed);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError(''); // Сброс ошибки перед проверкой
+  // Обработчик отправки формы с мемоизацией через useCallback
+  const handleSubmit = useCallback((e) => {
+    e.preventDefault(); // Отменяем стандартное поведение формы
+    setError(''); // Сбрасываем предыдущую ошибку
 
-    if (!isValidUsername(username)) {
-      setError('Имя короче 2 символов и содержать не допустимые символы');
+    // Проверка на пустое значение или пробелы
+    if (!username || !username.trim()) {
+      setError('Введите имя');
       return;
     }
 
-    const trimmedName = username.trim();
+    const trimmedName = username.trim(); // Обрезаем пробелы
+
+    // Проверка длины имени
+    if (trimmedName.length < 2) {
+      setError('Имя должно быть не короче 2 символов');
+      return;
+    }
+
+    // Проверка допустимых символов
+    if (!isValidUsername(trimmedName)) {
+      setError('Имя содержит недопустимые символы');
+      return;
+    }
+
+    // Проверка доступности localStorage
+    if (!canUseLocalStorage()) {
+      setError('localStorage недоступен. Попробуйте другой браузер.');
+      return;
+    }
 
     try {
-      // Чтение пользователей из localStorage
-      const storedUsers = JSON.parse(localStorage.getItem('user')) || [];
-
-      // Поиск пользователя по имени
+      // Загружаем текущих пользователей
+      const storedUsers = loadUsers();
+      // Ищем индекс пользователя с таким именем
       const userIndex = storedUsers.findIndex(user => user.name === trimmedName);
 
-      let updatedUsers;
-
+      // Создаем новый массив пользователей
+      const updatedUsers = [...storedUsers];
+      
       if (userIndex !== -1) {
-        // Если пользователь найден — обновляем isLogined
-        updatedUsers = storedUsers.map(user =>
-          user.name === trimmedName
-            ? { ...user, isLogined: true }
-            : user
-        );
+        // Если пользователь найден - обновляем его статус isLogined
+        updatedUsers[userIndex] = { ...storedUsers[userIndex], isLogined: true };
       } else {
-        // Если пользователя нет — добавляем нового
-        updatedUsers = [
-          ...storedUsers,
-          { name: trimmedName, isLogined: true }
-        ];
+        // Если пользователя нет - добавляем нового
+        updatedUsers.push({ name: trimmedName, isLogined: true });
       }
 
-      // Запись в localStorage
-      localStorage.setItem('user', JSON.stringify(updatedUsers));
-
-      // Устанавливаем username в контекст
+      // Сохраняем обновленный массив в localStorage
+      saveUsers(updatedUsers);
+      // Обновляем глобальное состояние username
       setUsername(trimmedName);
-
-      // Сигнализируем другим компонентам об изменении (опционально)
-      window.dispatchEvent(new Event('storage'));
-
-      // Очистка поля ввода
-      setUsername('');
-
+      // Очищаем поле ввода
+      setLocalUsername('');
+      
     } catch (err) {
+      // Обработка ошибок работы с localStorage
       console.error('Ошибка работы с localStorage:', err);
       setError('Произошла ошибка при сохранении данных');
     }
-  };
+  }, [username, setUsername, setError]); // Зависимости хука useCallback
 
   return (
     <form className={styles['form']} onSubmit={handleSubmit}>
       <Input
         placeholder="Ваше имя"
         name="login"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={username} // Текущее значение из локального состояния
+        onChange={(e) => setLocalUsername(e.target.value)} // Обновляем локальное состояние при вводе
       />
-      
-      {/* Вывод ошибки, если есть */}
+      {/* Отображаем сообщение об ошибке, если оно есть */}
       {error && <p className={styles.error}>{error}</p>}
-      
-      <Button name="Войти в профиль" type="submit" />
+      <Button
+        name="Войти в профиль"
+        type="submit"
+        disabled={!!error} // Блокируем кнопку при наличии ошибки
+      />
     </form>
   );
 }
