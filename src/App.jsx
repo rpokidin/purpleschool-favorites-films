@@ -8,6 +8,7 @@ import FilmList from './components/FilmList/FilmList'
 import FilmCard from './components/FilmCard/FilmCard'
 import styles from './index.module.css'
 import Login from './components/Login/Login'
+import { UserContextProvider } from './context/user.context'
 
 const data = [
   {
@@ -33,11 +34,15 @@ function App() {
     <>
       <Header>
         <Logo/>
-        <Nav/>
+        <UserContextProvider>
+          <Nav/>
+        </UserContextProvider>
       </Header>
       <div className={styles['wrapper']}>
         <TitleH1 title="Вход"/>
-        <Login/>
+        <UserContextProvider>
+          <Login/>
+        </UserContextProvider>
         <TitleH1 title="Поиск"/>
         <Paragraph 
           text="Введите название фильма, сериала или мультфильма для поиска и добавления в избранное."

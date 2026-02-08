@@ -1,62 +1,40 @@
-import styles from './Nav.module.css'
-import { useState, useEffect  } from 'react'
+import styles from './Nav.module.css';
+import { useContext } from 'react';
+import { UserContext } from '../../context/user.context';
 
 function Nav() {
-
-  const [currentUser, setCurrentUser] = useState(null)
-
-  useEffect(() => {
-
-    const loadUser = () => {
-      try {
-        const storedUsers = JSON.parse(localStorage.getItem('user')) || []
-        const loggedInUser = storedUsers.find(user => user.isLogined === true)
-        setCurrentUser(loggedInUser)
-      } catch (err) {
-        console.error('Ошибка чтения из localStorage:', err)
-        setCurrentUser(null)
-      }
-    }
-
-    loadUser()
-
-    window.addEventListener('storage', loadUser)
-
-    return () => {
-      window.removeEventListener('storage', loadUser)
-    }
-  }, [])
+  const { username, setUsername } = useContext(UserContext);
 
   const handleLogout = (e) => {
-
-    e.preventDefault()
+    e.preventDefault();
     
     try {
-      const storedUsers = JSON.parse(localStorage.getItem('user')) || []
+      const storedUsers = JSON.parse(localStorage.getItem('user')) || [];
       
+      // Обновляем статус isLogined для текущего пользователя
       const updatedUsers = storedUsers.map(user => 
-        user.name === currentUser.name
+        user.name === username
           ? { ...user, isLogined: false }
           : user
-      )
-
-      localStorage.setItem('user', JSON.stringify(updatedUsers))
+      );
       
-      setCurrentUser(null)
+      localStorage.setItem('user', JSON.stringify(updatedUsers));
+      setUsername(''); // Сброс в контексте
+      
     } catch (err) {
-      console.error('Ошибка при выходе из профиля:', err)
+      console.error('Ошибка при выходе из профиля:', err);
     }
-  }
+  };
 
   return (
     <nav className={styles['nav']}>
       <ul>
         <li><a href="#">Поиск фильмов</a></li>
         <li><a href="#">Мои фильмы</a></li>
-        {currentUser && (
+        {username && (
           <li>
             <a href="#">
-              {currentUser.name}
+              {username}
               <img src="/public/user-ico.svg" alt="Профиль пользователя" />
             </a>
           </li>
@@ -66,7 +44,7 @@ function Nav() {
         </li>
       </ul>
     </nav>
-  )
+  );
 }
 
-export default Nav
+export default Nav;
