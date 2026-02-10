@@ -8,6 +8,7 @@ import FilmList from './components/FilmList/FilmList'
 import FilmCard from './components/FilmCard/FilmCard'
 import styles from './index.module.css'
 import Login from './components/Login/Login'
+import { UserContextProvider } from './context/user.context'
 
 const data = [
   {
@@ -30,7 +31,7 @@ const data = [
 function App() {
 
   return (
-    <>
+    <UserContextProvider>
       <Header>
         <Logo/>
         <Nav/>
@@ -58,7 +59,7 @@ function App() {
           }
         </FilmList>
       </div>
-    </>
+    </UserContextProvider>
   )
 }
 
