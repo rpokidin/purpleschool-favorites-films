@@ -1,14 +1,9 @@
 import styles from './Input.module.css'
+import type { InputStyle, InputProps } from './Input.props';
 
-function Input({ 
-  ico = null, 
-  name = '', 
-  placeholder = '',
-  value = '',
-  onChange = () => {},
-}) {
+const Input = ({ ico = null, onChange, ...props}: InputProps) => {
 
-  const inputStyle = {
+  const inputStyle: InputStyle = {
     backgroundPosition: '16px center',
     backgroundRepeat: 'no-repeat',
     paddingLeft: '16px',
@@ -22,12 +17,9 @@ function Input({
   return (
     <input 
       className={styles['input-default']}
-      type="text" 
-      placeholder={placeholder}
-      name={name} 
       style={inputStyle}
-      value={value}
       onChange={onChange}
+      {...props}
       />
   )
 }

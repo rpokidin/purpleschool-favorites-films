@@ -2,6 +2,12 @@ import styles from './Nav.module.css';
 import { useContext, useCallback, useState } from 'react';
 import { UserContext } from '../../context/user.context';
 
+// Интерфейс для типа пользователя
+interface User {
+  name: string;
+  isLogined: boolean;
+}
+
 // Функция для проверки доступности localStorage
 const canUseLocalStorage = () => {
   try {
@@ -12,10 +18,12 @@ const canUseLocalStorage = () => {
 };
 
 // Загружает массив пользователей из localStorage
-const loadUsers = () => {
+const loadUsers = (): User[] => {
   if (!canUseLocalStorage()) return [];
   try {
-    return JSON.parse(localStorage.getItem('user')) || [];
+    const stored = localStorage.getItem('user');
+    if (stored === null) return []; // Проверка на null
+    return JSON.parse(stored);
   } catch (err) {
     console.error('Ошибка чтения из localStorage:', err);
     return [];
@@ -23,7 +31,7 @@ const loadUsers = () => {
 };
 
 // Сохраняет массив пользователей в localStorage
-const saveUsers = (users) => {
+const saveUsers = (users: User[]): void => {
   if (!canUseLocalStorage()) return;
   try {
     localStorage.setItem('user', JSON.stringify(users));
@@ -32,15 +40,17 @@ const saveUsers = (users) => {
   }
 };
 
-function Nav() {
+const Nav = () => {
   const { username, setUsername } = useContext(UserContext);
   
   // Состояние для отслеживания процесса выхода (чтобы показать индикатор загрузки)
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Обработчик клика по кнопке «Выйти»
-  const handleLogout = useCallback(async (e) => {
-    e.preventDefault();
+  const handleLogout = useCallback(() => {
+
+    if (!username) return;
+    
     setIsLoggingOut(true); 
 
     try {
@@ -52,7 +62,7 @@ function Nav() {
       
       saveUsers(updatedUsers);
       
-      setUsername('');
+      setUsername();
     } catch (err) {
       console.error('Ошибка при выходе из профиля:', err);
     } finally {
@@ -77,7 +87,6 @@ function Nav() {
           <a
             href="#"
             onClick={handleLogout}
-            disabled={isLoggingOut}
             className={isLoggingOut ? styles['logout-disabled'] : ''}
           >
             {isLoggingOut ? 'Выход...' : 'Выйти'}
