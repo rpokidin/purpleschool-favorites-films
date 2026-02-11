@@ -1,10 +1,22 @@
 import Input from '../Input/Input';
 import Button from '../Button/Button';
 import styles from './Login.module.css';
-import { useState, useContext, useCallback } from 'react';
+import { useState, useContext, useCallback, SyntheticEvent, ChangeEvent } from 'react';
 import { UserContext } from '../../context/user.context';
+import type { LoginProps } from './Login.props';
 
-function Login() {
+// Интерфейс для типа пользователя
+interface User {
+  name: string;
+  isLogined: boolean;
+}
+
+// Алиас для события формы
+export type FormSubmitEvent = SyntheticEvent<HTMLFormElement>;
+// Алиас для событий изменения поля ввода (правильный тип для onChange)
+export type InputChangeEvent = ChangeEvent<HTMLInputElement>;
+
+const Login = ({}: LoginProps) => {
   // Локальное состояние для значения поля ввода
   const [username, setLocalUsername] = useState('');
   // Локальное состояние для отображения ошибок валидации
@@ -14,7 +26,7 @@ function Login() {
   const { setUsername } = useContext(UserContext);
 
   // Проверяет доступность localStorage в текущем окружении
-  const canUseLocalStorage = () => {
+  const canUseLocalStorage = (): boolean => {
     try {
       return 'localStorage' in window && window.localStorage !== null;
     } catch (e) {
@@ -23,9 +35,14 @@ function Login() {
   };
 
   // Загружает массив пользователей из localStorage
-  const loadUsers = () => {
+  const loadUsers = (): User[] => {
     try {
-      return JSON.parse(localStorage.getItem('user')) || [];
+      const stored = localStorage.getItem('user');
+      // Проверка на null перед парсингом
+      if (stored === null) {
+        return [];
+      }
+      return JSON.parse(stored);
     } catch (err) {
       console.error('Ошибка чтения из localStorage:', err);
       return [];
@@ -33,7 +50,7 @@ function Login() {
   };
 
   // Сохраняет массив пользователей в localStorage
-  const saveUsers = (users) => {
+  const saveUsers = (users: User[]): void => {
     try {
       localStorage.setItem('user', JSON.stringify(users));
     } catch (err) {
@@ -43,16 +60,16 @@ function Login() {
   };
 
   // Валидирует имя пользователя:
-  const isValidUsername = (name) => {
+  const isValidUsername = (name: string): boolean => {
     const trimmed = name.trim();
     if (trimmed.length < 2) return false;
     return /^[a-zA-Za-яА-Я0-9\s-]+$/.test(trimmed);
   };
 
   // Обработчик отправки формы с мемоизацией через useCallback
-  const handleSubmit = useCallback((e) => {
-    e.preventDefault(); // Отменяем стандартное поведение формы
-    setError(''); // Сбрасываем предыдущую ошибку
+  const handleSubmit = useCallback((e: FormSubmitEvent) => {
+    e.preventDefault();
+    setError('');
 
     // Проверка на пустое значение или пробелы
     if (!username || !username.trim()) {
@@ -60,7 +77,7 @@ function Login() {
       return;
     }
 
-    const trimmedName = username.trim(); // Обрезаем пробелы
+    const trimmedName = username.trim();
 
     // Проверка длины имени
     if (trimmedName.length < 2) {
@@ -109,23 +126,21 @@ function Login() {
       console.error('Ошибка работы с localStorage:', err);
       setError('Произошла ошибка при сохранении данных');
     }
-  }, [username, setUsername, setError]); // Зависимости хука useCallback
+  }, [username, setUsername, setError]);
 
   return (
     <form className={styles['form']} onSubmit={handleSubmit}>
       <Input
         placeholder="Ваше имя"
         name="login"
-        value={username} // Текущее значение из локального состояния
-        onChange={(e) => setLocalUsername(e.target.value)} // Обновляем локальное состояние при вводе
+        value={username}
+         onChange={(e: InputChangeEvent) => setLocalUsername(e.target.value)}
       />
-      {/* Отображаем сообщение об ошибке, если оно есть */}
       {error && <p className={styles.error}>{error}</p>}
       <Button
-        name="Войти в профиль"
         type="submit"
-        disabled={!!error} // Блокируем кнопку при наличии ошибки
-      />
+        disabled={!!error}
+      >Войти в профиль</Button>
     </form>
   );
 }

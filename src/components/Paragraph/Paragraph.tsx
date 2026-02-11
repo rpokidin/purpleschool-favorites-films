@@ -1,6 +1,7 @@
 import styles from './Paragraph.module.css'
+import type { ParagraphProps } from './Paragraph.props';
 
-function Paragraph({ text, size = 16 }) {
+function Paragraph({ text, size = 16 }: ParagraphProps) {
 
   return (
     <p 
