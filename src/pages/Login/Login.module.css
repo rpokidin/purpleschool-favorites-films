@@ -1,7 +1,7 @@
 .form {
   display: inline-flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
 }
 .error {
   font-size: 12px;
