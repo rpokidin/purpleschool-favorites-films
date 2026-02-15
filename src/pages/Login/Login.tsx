@@ -1,9 +1,12 @@
-import Input from '../Input/Input';
-import Button from '../Button/Button';
+
 import styles from './Login.module.css';
+import Input from '../../components/Input/Input';
+import Button from '../../components/Button/Button';
 import { useState, useContext, useCallback, SyntheticEvent, ChangeEvent } from 'react';
 import { UserContext } from '../../context/user.context';
 import type { LoginProps } from './Login.props';
+import TitleH1 from '../../components/TitleH1/TitleH1';
+
 
 // Интерфейс для типа пользователя
 interface User {
@@ -129,6 +132,8 @@ const Login = ({}: LoginProps) => {
   }, [username, setUsername, setError]);
 
   return (
+    <>
+    <TitleH1 title="Вход"/>
     <form className={styles['form']} onSubmit={handleSubmit}>
       <Input
         placeholder="Ваше имя"
@@ -142,6 +147,7 @@ const Login = ({}: LoginProps) => {
         disabled={!!error}
       >Войти в профиль</Button>
     </form>
+    </>
   );
 }
 

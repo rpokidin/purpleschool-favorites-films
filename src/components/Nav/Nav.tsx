@@ -1,6 +1,7 @@
 import styles from './Nav.module.css';
 import { useContext, useCallback, useState } from 'react';
 import { UserContext } from '../../context/user.context';
+import { NavLink, Link } from "react-router-dom"
 
 // Интерфейс для типа пользователя
 interface User {
@@ -73,8 +74,12 @@ const Nav = () => {
   return (
     <nav className={styles['nav']}>
       <ul>
-        <li key="search"><a href="#">Поиск фильмов</a></li>
-        <li key="my-movies"><a href="#">Мои фильмы</a></li>
+        <li key="main">
+          <NavLink to="/">Поиск фильмов</NavLink>
+        </li>
+        <li key="favorites">
+          <NavLink to="/favorites">Мои фильмы</NavLink>
+        </li>
         {username && (
           <li key="profile">
             <a href="#">
@@ -83,15 +88,23 @@ const Nav = () => {
             </a>
           </li>
         )}
-        <li key="logout">
-          <a
-            href="#"
-            onClick={handleLogout}
-            className={isLoggingOut ? styles['logout-disabled'] : ''}
-          >
-            {isLoggingOut ? 'Выход...' : 'Выйти'}
-          </a>
-        </li>
+        {username ? (
+          <li key="logout">
+            <Link 
+              to="/"
+              onClick={handleLogout}
+            >
+              Выйти
+            </Link>
+          </li>
+        ) : (
+          <li key="login">
+            <NavLink to="/login">
+              Войти
+              <img src="/login-ico.svg" alt="" />
+            </NavLink>
+          </li>
+        )}
       </ul>
     </nav>
   );
