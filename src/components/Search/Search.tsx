@@ -9,7 +9,7 @@ type FormSubmitEvent = React.SyntheticEvent<HTMLFormElement>;
 
 const Search = ({ onSearch, initialValue = '' }: SearchProps) => {
 
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState(initialValue);
 
   const handleSubmit = (e: FormSubmitEvent) => {
 

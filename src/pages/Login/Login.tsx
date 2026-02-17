@@ -5,7 +5,7 @@ import Button from '../../components/Button/Button';
 import { useState, useContext, useCallback, SyntheticEvent, ChangeEvent } from 'react';
 import { UserContext } from '../../context/user.context';
 import type { LoginProps } from './Login.props';
-import TitleH1 from '../../components/TitleH1/TitleH1';
+import TitleH1 from '../../components/UniversalTitle/UniversalTitle';
 
 
 // Интерфейс для типа пользователя

@@ -1,0 +1,11 @@
+.universal-title {
+  font-weight: 600;
+  color: var(--gray-50)
+}
+
+h1 {
+  font-size: 64px;
+}
+h3 {
+  font-size: 32px;
+}

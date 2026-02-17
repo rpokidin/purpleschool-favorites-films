@@ -1,12 +1,15 @@
 :root {
   --white: #FFF;
   --gray-50: #EBEEF5;
+  --gray-100:#C3C8D4;
   --gray-200: #A8AEBF;
   --gray-300: #8E95A9;
+  --gray-400: #767E94;
   --gray-600: #475069;  
   --gray-700: #323B54;
   --black-10: rgba(0, 0, 0, 0.1);
   --primary-400: #7B6EF6;
+  --orange: #FFAD49;
 }
 
 * {
@@ -22,8 +25,17 @@ body {
   background-position: center top;
   background-size: cover;
   background-repeat: no-repeat;
+  font-size: 16px;
+  color: var(--gray-200);
   height: 100vh;
   font-family: "Poppins", sans-serif;
+}
+
+.d-flex {
+  display: flex;
+}
+.d-aic {
+  align-items: center;
 }
 
 button {
