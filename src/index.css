@@ -38,6 +38,10 @@ body {
   align-items: center;
 }
 
+.t-ac {
+  text-align: center;
+}
+
 button {
   cursor: pointer;
 }

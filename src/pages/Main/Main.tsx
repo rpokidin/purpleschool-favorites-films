@@ -68,10 +68,6 @@ const Main = () => {
       <Search onSearch={handleSearch} />
 
       <FilmList>
-        {loading && <div>Загрузка фильмов...</div>}
-
-        {error && <div className="error">Ошибка: {error}</div>}
-
         {searchQuery && films.length > 0 ? (
           films.map(film => (
             <FilmCard
@@ -82,12 +78,17 @@ const Main = () => {
               rating={film.rating}
             />
           ))
-        ) : (
-          searchQuery && !loading && !error && (
-            <p>По запросу "{searchQuery}" ничего не найдено</p>
-          )
-        )}
+        ) : null}
       </FilmList>
+
+      {searchQuery && !loading && !error && (
+        <div className='t-ac'>
+          <UniversalTitle title="Упс... Ничего не найдено" />
+          <Paragraph
+            text="Попробуйте изменить запрос или ввести более точное название фильма"
+          />
+        </div>
+      )}
     </>
   );
 };
