@@ -1,9 +1,11 @@
 .nav ul {
   list-style: none;
   display: flex;
+  align-items: center;
   gap: 64px;
 }
-.nav ul li a {
+.nav ul li a,
+.nav ul li button {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -13,7 +15,13 @@
   color: var(--gray-200);
   text-decoration: none;
 }
+.nav ul li button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
 .nav ul li a:hover,
+.nav ul li button:hover,
 .nav ul li a:global(.active) {
   color: var(--white);
 }

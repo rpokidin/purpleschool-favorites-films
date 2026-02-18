@@ -1,7 +1,7 @@
 import styles from './Nav.module.css';
 import { useContext, useCallback, useState } from 'react';
 import { UserContext } from '../../context/user.context';
-import { NavLink, Link } from "react-router-dom"
+import { NavLink, Link, useNavigate } from "react-router-dom"
 
 // Интерфейс для типа пользователя
 interface User {
@@ -43,6 +43,7 @@ const saveUsers = (users: User[]): void => {
 
 const Nav = () => {
   const { username, setUsername } = useContext(UserContext);
+  const navigate = useNavigate()
   
   // Состояние для отслеживания процесса выхода (чтобы показать индикатор загрузки)
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -64,10 +65,12 @@ const Nav = () => {
       saveUsers(updatedUsers);
       
       setUsername();
+
     } catch (err) {
       console.error('Ошибка при выходе из профиля:', err);
     } finally {
       setIsLoggingOut(false);
+      navigate('/login');
     }
   }, [username, setUsername]);
 
@@ -90,12 +93,11 @@ const Nav = () => {
         )}
         {username ? (
           <li key="logout">
-            <Link 
-              to="/"
+            <button 
               onClick={handleLogout}
             >
               Выйти
-            </Link>
+            </button>
           </li>
         ) : (
           <li key="login">
