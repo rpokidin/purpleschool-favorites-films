@@ -81,7 +81,7 @@ const Main = () => {
         ) : null}
       </FilmList>
 
-      {searchQuery && !loading && !error && (
+      {searchQuery && !loading && films.length === 0 && !error && (
         <div className='t-ac'>
           <UniversalTitle title="Упс... Ничего не найдено" />
           <Paragraph

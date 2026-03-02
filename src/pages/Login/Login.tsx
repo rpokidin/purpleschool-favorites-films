@@ -6,7 +6,7 @@ import { useState, useContext, useCallback, SyntheticEvent, ChangeEvent } from '
 import { UserContext } from '../../context/user.context';
 import type { LoginProps } from './Login.props';
 import TitleH1 from '../../components/UniversalTitle/UniversalTitle';
-
+import { useNavigate } from 'react-router-dom';
 
 // Интерфейс для типа пользователя
 interface User {
@@ -20,12 +20,10 @@ export type FormSubmitEvent = SyntheticEvent<HTMLFormElement>;
 export type InputChangeEvent = ChangeEvent<HTMLInputElement>;
 
 const Login = ({}: LoginProps) => {
-  // Локальное состояние для значения поля ввода
+  const navigate = useNavigate()
   const [username, setLocalUsername] = useState('');
-  // Локальное состояние для отображения ошибок валидации
   const [error, setError] = useState('');
-
-  // Получаем функцию обновления глобального состояния username из контекста
+  
   const { setUsername } = useContext(UserContext);
 
   // Проверяет доступность localStorage в текущем окружении
@@ -123,6 +121,7 @@ const Login = ({}: LoginProps) => {
       setUsername(trimmedName);
       // Очищаем поле ввода
       setLocalUsername('');
+      navigate('/')
       
     } catch (err) {
       // Обработка ошибок работы с localStorage
