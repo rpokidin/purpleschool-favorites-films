@@ -15,12 +15,19 @@ export interface Rating {
 }
 
 export interface MovieData {
+  id: number; 
   name: string;
   description?: string;
-  rating?: Rating;
-  poster?: Poster;
+  rating?: {
+    imdb?: number;
+  };
+  poster?: {
+    previewUrl?: string;
+  };
   type?: string;
-  premiere?: Premiere;
+  premiere?: {
+    world?: string;
+  };
   movieLength?: number;
-  genres?: Genre[];
+  genres?: Array<{ name: string }>;
 }

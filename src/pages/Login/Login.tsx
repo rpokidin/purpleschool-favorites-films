@@ -1,4 +1,3 @@
-
 import styles from './Login.module.css';
 import Input from '../../components/Input/Input';
 import Button from '../../components/Button/Button';
@@ -7,147 +6,89 @@ import { UserContext } from '../../context/user.context';
 import type { LoginProps } from './Login.props';
 import TitleH1 from '../../components/UniversalTitle/UniversalTitle';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { clearFavorites, addToFavorites } from '../../store/favorites.slice';
 
-// Интерфейс для типа пользователя
-interface User {
-  name: string;
-  isLogined: boolean;
-}
-
-// Алиас для события формы
-export type FormSubmitEvent = SyntheticEvent<HTMLFormElement>;
-// Алиас для событий изменения поля ввода (правильный тип для onChange)
-export type InputChangeEvent = ChangeEvent<HTMLInputElement>;
+type FormSubmitEvent = SyntheticEvent<HTMLFormElement>;
+type InputChangeEvent = ChangeEvent<HTMLInputElement>;
 
 const Login = ({}: LoginProps) => {
-  const navigate = useNavigate()
-  const [username, setLocalUsername] = useState('');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [username, setUsernameLocal] = useState('');
   const [error, setError] = useState('');
-  
   const { setUsername } = useContext(UserContext);
 
-  // Проверяет доступность localStorage в текущем окружении
-  const canUseLocalStorage = (): boolean => {
+  const loadUsers = (): LoginProps[] => {
     try {
-      return 'localStorage' in window && window.localStorage !== null;
-    } catch (e) {
-      return false;
-    }
-  };
-
-  // Загружает массив пользователей из localStorage
-  const loadUsers = (): User[] => {
-    try {
-      const stored = localStorage.getItem('user');
-      // Проверка на null перед парсингом
-      if (stored === null) {
-        return [];
-      }
-      return JSON.parse(stored);
-    } catch (err) {
-      console.error('Ошибка чтения из localStorage:', err);
+      return JSON.parse(localStorage.getItem('user') || '[]');
+    } catch {
       return [];
     }
   };
 
-  // Сохраняет массив пользователей в localStorage
-  const saveUsers = (users: User[]): void => {
+  const saveUsers = (users: LoginProps[]) => {
     try {
       localStorage.setItem('user', JSON.stringify(users));
-    } catch (err) {
-      console.error('Ошибка записи в localStorage:', err);
-      throw err;
-    }
+    } catch {}
   };
 
-  // Валидирует имя пользователя:
-  const isValidUsername = (name: string): boolean => {
-    const trimmed = name.trim();
-    if (trimmed.length < 2) return false;
-    return /^[a-zA-Za-яА-Я0-9\s-]+$/.test(trimmed);
-  };
+  const isValidUsername = (name: string) =>
+    name.trim().length >= 2 &&
+    /^[a-zA-Za-яА-Я0-9\s-]+$/.test(name.trim());
 
-  // Обработчик отправки формы с мемоизацией через useCallback
   const handleSubmit = useCallback((e: FormSubmitEvent) => {
     e.preventDefault();
     setError('');
+    const trimmed = username.trim();
 
-    // Проверка на пустое значение или пробелы
-    if (!username || !username.trim()) {
-      setError('Введите имя');
-      return;
-    }
-
-    const trimmedName = username.trim();
-
-    // Проверка длины имени
-    if (trimmedName.length < 2) {
-      setError('Имя должно быть не короче 2 символов');
-      return;
-    }
-
-    // Проверка допустимых символов
-    if (!isValidUsername(trimmedName)) {
-      setError('Имя содержит недопустимые символы');
-      return;
-    }
-
-    // Проверка доступности localStorage
-    if (!canUseLocalStorage()) {
-      setError('localStorage недоступен. Попробуйте другой браузер.');
-      return;
-    }
+    if (!trimmed) return setError('Введите имя');
+    if (trimmed.length < 2) return setError('Имя должно быть не короче 2 символов');
+    if (!isValidUsername(trimmed)) return setError('Имя содержит недопустимые символы');
 
     try {
-      // Загружаем текущих пользователей
-      const storedUsers = loadUsers();
-      // Ищем индекс пользователя с таким именем
-      const userIndex = storedUsers.findIndex(user => user.name === trimmedName);
+      const users = loadUsers();
+      const idx = users.findIndex(u => u.name === trimmed);
+      const updated = [...users];
 
-      // Создаем новый массив пользователей
-      const updatedUsers = [...storedUsers];
-      
-      if (userIndex !== -1) {
-        // Если пользователь найден - обновляем его статус isLogined
-        updatedUsers[userIndex] = { ...storedUsers[userIndex], isLogined: true };
+      if (idx !== -1) {
+        updated[idx] = { ...users[idx], isLogined: true };
       } else {
-        // Если пользователя нет - добавляем нового
-        updatedUsers.push({ name: trimmedName, isLogined: true });
+        updated.push({ name: trimmed, isLogined: true });
       }
 
-      // Сохраняем обновленный массив в localStorage
-      saveUsers(updatedUsers);
-      // Обновляем глобальное состояние username
-      setUsername(trimmedName);
-      // Очищаем поле ввода
-      setLocalUsername('');
-      navigate('/')
-      
-    } catch (err) {
-      // Обработка ошибок работы с localStorage
-      console.error('Ошибка работы с localStorage:', err);
+      saveUsers(updated);
+
+      // Синхронизация избранного с Redux
+      const user = updated.find(u => u.name === trimmed);
+      if (user?.favorites) {
+        dispatch(clearFavorites());
+        user.favorites.forEach((film: any) => dispatch(addToFavorites(film)));
+      }
+
+      setUsername(trimmed);
+      setUsernameLocal('');
+      navigate('/');
+    } catch {
       setError('Произошла ошибка при сохранении данных');
     }
-  }, [username, setUsername, setError]);
+  }, [username, setUsername, dispatch]);
 
   return (
     <>
-    <TitleH1 title="Вход"/>
-    <form className={styles['form']} onSubmit={handleSubmit}>
-      <Input
-        placeholder="Ваше имя"
-        name="login"
-        value={username}
-         onChange={(e: InputChangeEvent) => setLocalUsername(e.target.value)}
-      />
-      {error && <p className={styles.error}>{error}</p>}
-      <Button
-        type="submit"
-        disabled={!!error}
-      >Войти в профиль</Button>
-    </form>
+      <TitleH1 title="Вход"/>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <Input
+          placeholder="Ваше имя"
+          name="login"
+          value={username}
+          onChange={(e: InputChangeEvent) => setUsernameLocal(e.target.value)}
+        />
+        {error && <p className={styles.error}>{error}</p>}
+        <Button type="submit" disabled={!!error}>Войти в профиль</Button>
+      </form>
     </>
   );
-}
+};
 
 export default Login;
