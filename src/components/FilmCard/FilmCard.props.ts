@@ -1,6 +1,7 @@
 export interface FilmCardProps {
-  id: string;
+  id: number;
   previewUrl: string;
   name: string;
-  rating?: number;
+  rating: number;
+  link: string;
 }

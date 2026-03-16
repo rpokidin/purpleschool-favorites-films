@@ -14,79 +14,51 @@ const Main = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const getFilms = async (query: string) => {
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilms([]);
+      setError(null);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
-    try {
-      const res = await axios.get(
-        `${PREFIX}search?query=${encodeURIComponent(query)}`,
-        {
-          headers: {
-            'X-API-Key': API_KEY
-          }
+    axios.get(`${PREFIX}search?query=${encodeURIComponent(searchQuery)}`, {
+      headers: { 'X-API-Key': API_KEY }
+    })
+      .then(res => {
+        if (res.data.docs?.length) {
+          setFilms(res.data.docs.map((item: any) => ({
+            id: item.id || '',
+            name: item.name || item.title || 'Без названия',
+            previewUrl: item.poster?.previewUrl || item.posterUrl || '/public/no-image.gif',
+            rating: item.rating?.imdb || item.rating?.kp || undefined
+          })));
+        } else {
+          setError('Фильмы не найдены');
         }
-      );
-
-      if (res.data.docs && Array.isArray(res.data.docs)) {
-        const transformedFilms: FilmCardProps[] = res.data.docs.map((item: any) => ({
-          id: item.id || '',
-          name: item.name || item.title || 'Без названия',
-          previewUrl: item.poster?.previewUrl || item.posterUrl || '/public/no-image.gif',
-          rating: item.rating?.imdb || item.rating?.kp || undefined
-        }));
-        setFilms(transformedFilms);
-      } else {
-        setError('Фильмы не найдены');
-      }
-    } catch (error) {
-      setError('Ошибка при загрузке фильмов');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (searchQuery) {
-      getFilms(searchQuery);
-    } else {
-      setFilms([]);
-      setError(null);
-    }
+      })
+      .catch(() => setError('Ошибка при загрузке фильмов'))
+      .finally(() => setLoading(false));
   }, [searchQuery]);
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
 
   return (
     <>
       <UniversalTitle title="Поиск" />
-      <Paragraph
-        text="Введите название фильма, сериала или мультфильма для поиска и добавления в избранное."
-      />
-      <Search onSearch={handleSearch} />
-
+      <Paragraph text="Введите название фильма, сериала или мультфильма для поиска и добавления в избранное." />
+      <Search onSearch={setSearchQuery} />
+      {loading && <div>Загрузка...</div>}
+      {error && <div>{error}</div>}
       <FilmList>
-        {searchQuery && films.length > 0 ? (
-          films.map(film => (
-            <FilmCard
-              key={film.id}
-              id={film.id}
-              name={film.name}
-              previewUrl={film.previewUrl}
-              rating={film.rating}
-            />
-          ))
-        ) : null}
+        {films.map(film => (
+          <FilmCard key={film.id} {...film} />
+        ))}
       </FilmList>
-
-      {searchQuery && !loading && films.length === 0 && !error && (
+      {!loading && !error && films.length === 0 && searchQuery && (
         <div className='t-ac'>
           <UniversalTitle title="Упс... Ничего не найдено" />
-          <Paragraph
-            text="Попробуйте изменить запрос или ввести более точное название фильма"
-          />
+          <Paragraph text="Попробуйте изменить запрос или ввести более точное название фильма" />
         </div>
       )}
     </>

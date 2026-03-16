@@ -1,106 +1,64 @@
 import styles from './Nav.module.css';
 import { useContext, useCallback, useState } from 'react';
 import { UserContext } from '../../context/user.context';
-import { NavLink, Link, useNavigate } from "react-router-dom"
-
-// Интерфейс для типа пользователя
-interface User {
-  name: string;
-  isLogined: boolean;
-}
-
-// Функция для проверки доступности localStorage
-const canUseLocalStorage = () => {
-  try {
-    return 'localStorage' in window && window.localStorage !== null;
-  } catch (e) {
-    return false;
-  }
-};
-
-// Загружает массив пользователей из localStorage
-const loadUsers = (): User[] => {
-  if (!canUseLocalStorage()) return [];
-  try {
-    const stored = localStorage.getItem('user');
-    if (stored === null) return []; // Проверка на null
-    return JSON.parse(stored);
-  } catch (err) {
-    console.error('Ошибка чтения из localStorage:', err);
-    return [];
-  }
-};
-
-// Сохраняет массив пользователей в localStorage
-const saveUsers = (users: User[]): void => {
-  if (!canUseLocalStorage()) return;
-  try {
-    localStorage.setItem('user', JSON.stringify(users));
-  } catch (err) {
-    console.error('Ошибка записи в localStorage:', err);
-  }
-};
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { clearFavorites } from '../../store/favorites.slice'; // Импортируем действие сброса
 
 const Nav = () => {
+  const favoritesValue = useSelector((state: any) => state.favorites.count);
+  const dispatch = useDispatch(); // Получаем dispatch
   const { username, setUsername } = useContext(UserContext);
-  const navigate = useNavigate()
-  
-  // Состояние для отслеживания процесса выхода (чтобы показать индикатор загрузки)
+  const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Обработчик клика по кнопке «Выйти»
   const handleLogout = useCallback(() => {
-
     if (!username) return;
-    
-    setIsLoggingOut(true); 
+
+    setIsLoggingOut(true);
 
     try {
-      const storedUsers = loadUsers();
-      
-      const updatedUsers = storedUsers.map(user =>
+      const users = JSON.parse(localStorage.getItem('user') || '[]');
+      const updatedUsers = users.map((user: any) =>
         user.name === username ? { ...user, isLogined: false } : user
       );
-      
-      saveUsers(updatedUsers);
-      
-      setUsername();
-
+      localStorage.setItem('user', JSON.stringify(updatedUsers));
+      setUsername('');
+      dispatch(clearFavorites()); // Сбрасываем состояние favorites в Redux
     } catch (err) {
-      console.error('Ошибка при выходе из профиля:', err);
+      console.error('Ошибка при выходе:', err);
     } finally {
       setIsLoggingOut(false);
       navigate('/login');
     }
-  }, [username, setUsername]);
+  }, [username, setUsername, navigate, dispatch]); // Добавляем dispatch в зависимости
 
   return (
-    <nav className={styles['nav']}>
+    <nav className={styles.nav}>
       <ul>
-        <li key="main">
-          <NavLink to="/">Поиск фильмов</NavLink>
-        </li>
-        <li key="favorites">
-          <NavLink to="/favorites">Мои фильмы</NavLink>
+        <li><NavLink to="/">Поиск фильмов</NavLink></li>
+        <li>
+          <NavLink to="/favorites">
+            Мои фильмы
+            {favoritesValue > 0 && <span className={styles.nav__count}>{favoritesValue}</span>}
+          </NavLink>
         </li>
         {username && (
-          <li key="profile">
-            <a href="#">
+          <li>
+            <div>
               {username}
               <img src="/user-ico.svg" alt="Профиль пользователя" />
-            </a>
+            </div>
           </li>
         )}
         {username ? (
-          <li key="logout">
-            <button 
-              onClick={handleLogout}
-            >
-              Выйти
+          <li>
+            <button onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut ? 'Выход...' : 'Выйти'}
             </button>
           </li>
         ) : (
-          <li key="login">
+          <li>
             <NavLink to="/login">
               Войти
               <img src="/login-ico.svg" alt="" />
@@ -110,6 +68,6 @@ const Nav = () => {
       </ul>
     </nav>
   );
-}
+};
 
 export default Nav;

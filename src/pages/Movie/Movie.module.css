@@ -43,6 +43,9 @@
   color: var(--primary-400);
   border: none;
 }
+.movie__to-favorites--active {
+  color: var(--success-400);
+}
 .movie__line {
   display: flex;
   flex-direction: column;
