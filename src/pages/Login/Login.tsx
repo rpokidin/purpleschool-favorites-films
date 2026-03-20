@@ -1,13 +1,13 @@
 import styles from './Login.module.css';
 import Input from '../../components/Input/Input';
 import Button from '../../components/Button/Button';
-import { useState, useContext, useCallback, SyntheticEvent, ChangeEvent } from 'react';
-import { UserContext } from '../../context/user.context';
+import { useState, useCallback, SyntheticEvent, ChangeEvent } from 'react';
 import type { LoginProps } from './Login.props';
 import TitleH1 from '../../components/UniversalTitle/UniversalTitle';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { clearFavorites, addToFavorites } from '../../store/favorites.slice';
+import { setUsername } from '../../store/user.slice';
 
 type FormSubmitEvent = SyntheticEvent<HTMLFormElement>;
 type InputChangeEvent = ChangeEvent<HTMLInputElement>;
@@ -17,66 +17,91 @@ const Login = ({}: LoginProps) => {
   const dispatch = useDispatch();
   const [username, setUsernameLocal] = useState('');
   const [error, setError] = useState('');
-  const { setUsername } = useContext(UserContext);
+
+  // Вспомогательные функции для работы с localStorage — берём из user.slice.ts
+  const canUseLocalStorage = (): boolean => {
+    try {
+      return 'localStorage' in window && window.localStorage !== null;
+    } catch (e) {
+      return false;
+    }
+  };
 
   const loadUsers = (): LoginProps[] => {
+    if (!canUseLocalStorage()) return [];
     try {
-      return JSON.parse(localStorage.getItem('user') || '[]');
-    } catch {
+      const stored = localStorage.getItem('user');
+      if (stored === null) return [];
+      return JSON.parse(stored);
+    } catch (err) {
+      console.error('Ошибка чтения из localStorage:', err);
       return [];
     }
   };
 
-  const saveUsers = (users: LoginProps[]) => {
+  const saveUsers = (users: LoginProps[]): boolean => {
+    if (!canUseLocalStorage()) {
+      console.warn('localStorage недоступен');
+      return false;
+    }
     try {
       localStorage.setItem('user', JSON.stringify(users));
-    } catch {}
+      return true;
+    } catch (err) {
+      console.error('Ошибка записи в localStorage:', err);
+      return false;
+    }
   };
 
   const isValidUsername = (name: string) =>
     name.trim().length >= 2 &&
     /^[a-zA-Za-яА-Я0-9\s-]+$/.test(name.trim());
 
-  const handleSubmit = useCallback((e: FormSubmitEvent) => {
-    e.preventDefault();
-    setError('');
-    const trimmed = username.trim();
 
-    if (!trimmed) return setError('Введите имя');
-    if (trimmed.length < 2) return setError('Имя должно быть не короче 2 символов');
-    if (!isValidUsername(trimmed)) return setError('Имя содержит недопустимые символы');
+const handleSubmit = useCallback((e: FormSubmitEvent) => {
+  e.preventDefault();
+  setError('');
+  const trimmed = username.trim();
 
-    try {
-      const users = loadUsers();
-      const idx = users.findIndex(u => u.name === trimmed);
-      const updated = [...users];
+  if (!trimmed) return setError('Введите имя');
+  if (trimmed.length < 2) return setError('Имя должно быть не короче 2 символов');
+  if (!isValidUsername(trimmed)) return setError('Имя содержит недопустимые символы');
 
-      if (idx !== -1) {
-        updated[idx] = { ...users[idx], isLogined: true };
-      } else {
-        updated.push({ name: trimmed, isLogined: true });
-      }
+  try {
+    const users = loadUsers(); // используем импортированную функцию
+    const userIndex = users.findIndex((u) => u.name === trimmed);
 
-      saveUsers(updated);
+    let updatedUsers: LoginProps[]; // тип User вместо LoginProps
 
-      // Синхронизация избранного с Redux
-      const user = updated.find(u => u.name === trimmed);
-      if (user?.favorites) {
-        dispatch(clearFavorites());
-        user.favorites.forEach((film: any) => dispatch(addToFavorites(film)));
-      }
-
-      setUsername(trimmed);
-      setUsernameLocal('');
-      navigate('/');
-    } catch {
-      setError('Произошла ошибка при сохранении данных');
+    if (userIndex !== -1) {
+      updatedUsers = users.map((u) =>
+        u.name === trimmed ? { ...u, isLogined: true } : u
+      );
+    } else {
+      updatedUsers = [...users, { name: trimmed, isLogined: true }];
     }
-  }, [username, setUsername, dispatch]);
+
+    saveUsers(updatedUsers); // используем импортированную функцию
+
+    // Синхронизация избранного с Redux
+    const currentUser = updatedUsers.find((u) => u.name === trimmed);
+    if (currentUser?.favorites) {
+      dispatch(clearFavorites());
+      currentUser.favorites.forEach((film: any) => dispatch(addToFavorites(film)));
+    }
+
+    dispatch(setUsername(trimmed));
+    setUsernameLocal('');
+    navigate('/');
+  } catch (err) {
+    console.error('Произошла ошибка при сохранении данных:', err);
+    setError('Произошла ошибка при сохранении данных');
+  }
+}, [username, dispatch]);
 
   return (
     <>
-      <TitleH1 title="Вход"/>
+      <TitleH1 title="Вход" />
       <form className={styles.form} onSubmit={handleSubmit}>
         <Input
           placeholder="Ваше имя"

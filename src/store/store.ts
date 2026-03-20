@@ -1,23 +1,8 @@
 import { configureStore, Middleware } from '@reduxjs/toolkit';
 import favoritesReducer from './favorites.slice';
+import userReducer from './user.slice'; // импортируем новый слайс
 
-const loadInitialStateFromStorage = () => {
-  try {
-    const usersData = localStorage.getItem('user');
-    if (!usersData) return { favorites: { films: [], count: 0 } };
-
-    const users = JSON.parse(usersData);
-    const loggedInUser = users.find((user: any) => user.isLogined);
-
-    return loggedInUser && Array.isArray(loggedInUser.favorites)
-      ? { favorites: { films: loggedInUser.favorites, count: loggedInUser.favorites.length } }
-      : { favorites: { films: [], count: 0 } };
-  } catch (error) {
-    console.error('Error loading initial state:', error);
-    return { favorites: { films: [], count: 0 } };
-  }
-};
-
+// Сохраняем существующий middleware для синхронизации избранного
 const localStorageMiddleware: Middleware = store => next => (action: unknown) => {
   const result = next(action);
 
@@ -29,12 +14,12 @@ const localStorageMiddleware: Middleware = store => next => (action: unknown) =>
     (action as { type: string }).type.startsWith('favorites/')
   ) {
     try {
-      const { favorites } = store.getState();
+      const { favorites, user } = store.getState() as RootState;
       const usersData = localStorage.getItem('user');
       if (usersData) {
         const users = JSON.parse(usersData);
-        const updatedUsers = users.map((user: any) =>
-          user.isLogined ? { ...user, favorites: favorites.films } : user
+        const updatedUsers = users.map((userItem: any) =>
+          userItem.name === user.username ? { ...userItem, favorites: favorites.films } : userItem
         );
         localStorage.setItem('user', JSON.stringify(updatedUsers));
       }
@@ -47,7 +32,13 @@ const localStorageMiddleware: Middleware = store => next => (action: unknown) =>
 };
 
 export const store = configureStore({
-  reducer: { favorites: favoritesReducer },
-  preloadedState: loadInitialStateFromStorage(),
+  reducer: {
+    favorites: favoritesReducer,
+    user: userReducer // добавляем пользовательский слайс
+  },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(localStorageMiddleware)
 });
+
+// Типизация корневого состояния
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
